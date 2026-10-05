@@ -30,5 +30,14 @@ const firebaseConfig = {
   universe_domain: process.env.UNIVERSE_DOMAIN,
 };  
 
+export const postgresConfig = {
+  host: process.env.PGHOST,
+  port: parseInt(process.env.PGPORT || '5432'),
+  user: process.env.PGUSER,
+  database: process.env.PGDATABASE,
+  password: process.env.PGPASSWORD,
+};
+
+
 export { environment, PORT, DB_URL, corsUrl, SECRET, tokenInfo, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, firebaseConfig };
 

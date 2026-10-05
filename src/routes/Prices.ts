@@ -5,13 +5,13 @@ const router = Router();
 router.get("/", async (req: Request, res: Response) => {
     try {
         console.log("Query Parameters:", req.query);
-        const { cityId, categoryId, search } = req.query;
+        const { cityName, categoryName, search } = req.query;
 
         const result = await pool.query(
-            `SELECT * FROM get_current_prices($1::uuid, $2::uuid, $3::text)`,
+            `SELECT * FROM get_current_prices($1::text, $2::text, $3::text)`,
             [
-                cityId || null,
-                categoryId || null,
+                cityName || null,
+                categoryName || null,
                 search || null
             ] 
         );

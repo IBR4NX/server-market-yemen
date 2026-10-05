@@ -4,11 +4,14 @@ import asyncHandler from "express-async-handler";
 
 import auth from '../auth/jwt'
 import priceRouter from "./Prices";
-
-
 router.use("/prices", priceRouter);
 
-
+import categoriesRouter from "./meta/categories";
+import citiesRouter from "./meta/cities";
+import productsRouter from "./meta/products";
+router.use("/cities", citiesRouter);
+router.use("/categories", categoriesRouter);
+router.use("/products", productsRouter);
 
 
 
@@ -23,8 +26,8 @@ router.get('/health',asyncHandler( async (req, res)=>{
   });
 }));
 
-router.use(/.*/, auth,asyncHandler( async (req:any, res:any)=>{
-  console.log("Access to restricted path:", req.originalUrl);
-    res.status(200).json({message: 'Access to this path is not allowed',status:req.user,cookies:req.cookies,query:req.query,body:req.body,params:req.params});
-}));
+// router.use(/.*/, auth,asyncHandler( async (req:any, res:any)=>{
+//   console.log("Access to restricted path:", req.originalUrl);
+//     res.status(200).json({message: 'Access to this path is not allowed',status:req.user,cookies:req.cookies,query:req.query,body:req.body,params:req.params});
+// }));
 export default router;

@@ -1,0 +1,64 @@
+users
+categories
+products
+cities
+price_submissions
+current_prices
+price_history
+
+Authentication
+├── create_user()
+├── get_user_by_email()
+└── get_user_by_id()
+
+Products
+├── create_product()
+├── get_products()
+├── get_product_by_id()
+└── update_product()
+
+Categories 
+├── create_category()
+├── get_categories()
+└── update_category()
+
+Cities
+├── create_city()
+├── get_cities()
+└── update_city()
+
+Prices
+├── get_current_price()
+├── get_current_prices()
+├── get_price_history()
+└── get_price_statistics()
+
+Submissions
+├── create_price_submission()
+├── get_pending_submissions()
+├── get_user_submissions()
+├── approve_price_submission()
+└── reject_price_submission()
+
+Dashboard
+└── get_dashboard_statistics()
+
+
+
+categories
+     │
+     └──────< products
+                 │
+                 ├──────< price_submissions
+                 ├──────< current_prices
+                 └──────< price_history
+
+cities
+     │
+     ├──────< price_submissions
+     ├──────< current_prices
+     └──────< price_history
+
+users
+     │
+     └──────< price_submissions

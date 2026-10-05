@@ -13,13 +13,16 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "outDir": "build",
-    "baseUrl": ".",
+    "baseUrl": "src",
+    "ignoreDeprecations": "6.0",
+
     "paths": {
+      "@/*": ["./*"],
+      "@/src/*": ["./src/*"],
+      // "@/database*": ["/database"],
       "*": ["node_modules/*", "src/auth/types/*"],
-      "@src/*": ["src/*"],
       
     },
-    "ignoreDeprecations": "5.0",
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
