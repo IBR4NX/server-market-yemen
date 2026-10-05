@@ -29,7 +29,7 @@ const firebaseConfig = {
   client_x509_cert_url: process.env.CLIENT_X509_CERT_URL,
   universe_domain: process.env.UNIVERSE_DOMAIN,
 };  
-
+ 
 export const postgresConfig = {
   host: process.env.PGHOST,
   port: parseInt(process.env.PGPORT || '5432'),
