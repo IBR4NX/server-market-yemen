@@ -1163,33 +1163,34 @@ $$;
 -- Get Current Prices
 -- ---------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION get_current_prices(
-    p_city_id UUID DEFAULT NULL,
-    p_category_id UUID DEFAULT NULL,
-    p_search TEXT DEFAULT NULL
+
+	CREATE OR REPLACE FUNCTION get_current_prices(
+    p_city_name     TEXT DEFAULT NULL,
+    p_category_name TEXT DEFAULT NULL,
+    p_search        TEXT DEFAULT NULL
 )
 RETURNS TABLE (
-    product_id UUID,
-    product_name VARCHAR(150),
-    category_id UUID,
+    product_id    UUID,
+    product_name  VARCHAR(150),
+    category_id   UUID,
     category_name VARCHAR(100),
-    city_id UUID,
-    city_name VARCHAR(100),
-    price DECIMAL(14,2),
-    quantity DECIMAL(12,3),
-    unit VARCHAR(50),
-    updated_at TIMESTAMPTZ
+    city_id       UUID,
+    city_name     VARCHAR(100),
+    price         DECIMAL(14,2),
+    quantity      DECIMAL(12,3),
+    unit          VARCHAR(50),
+    updated_at    TIMESTAMPTZ
 )
 LANGUAGE sql
 STABLE
 AS $$
     SELECT
         cp.product_id,
-        p.name AS product_name,
+        p.name        AS product_name,
         p.category_id,
-        cat.name AS category_name,
+        cat.name      AS category_name,
         cp.city_id,
-        c.name AS city_name,
+        c.name        AS city_name,
         cp.price,
         p.quantity,
         p.unit,
@@ -1206,20 +1207,24 @@ AS $$
         AND cat.is_active = TRUE
         AND c.is_active = TRUE
         AND (
-            p_city_id IS NULL
-            OR cp.city_id = p_city_id
+            p_city_name IS NULL
+            OR TRIM(p_city_name) = ''
+            OR c.name ILIKE '%' || TRIM(p_city_name) || '%'
         )
         AND (
-            p_category_id IS NULL
-            OR p.category_id = p_category_id
+            p_category_name IS NULL
+            OR TRIM(p_category_name) = ''
+            OR cat.name ILIKE '%' || TRIM(p_category_name) || '%'
         )
         AND (
             p_search IS NULL
-            OR p.name ILIKE '%' || TRIM(p_search) || '%'
+            OR TRIM(p_search) = ''
+            OR p.name   ILIKE '%' || TRIM(p_search) || '%'
+            OR c.name   ILIKE '%' || TRIM(p_search) || '%'
+            OR cat.name ILIKE '%' || TRIM(p_search) || '%'
         )
     ORDER BY p.name, c.name;
 $$;
-
 
 -- =========================================================
 -- 9. PRICE HISTORY

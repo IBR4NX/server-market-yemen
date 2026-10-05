@@ -10,13 +10,14 @@ import {
 const router = Router();
 
 router.get("/", async (req: Request, res: Response) => {
+  console.log("ssss");
   try {
+    console.log("ggg", req.query);
     const { categoryId, includeInactive, search } = req.query;
-    console.log(req.query, req.body);
 
     const result = await pool.query(
-      "select * from get_products($1::uuid, $2::uuid,$3::boolean, $3::text);",
-      [categoryId ?? null, null, includeInactive, search ?? null],
+      "select * from get_products($1::uuid, $2::uuid, $3::text ,$4::boolean);",
+      [categoryId ?? null, null,  search ?? null,includeInactive??null],
     );
 
     if (result.rows.length > 0) {
@@ -24,7 +25,8 @@ router.get("/", async (req: Request, res: Response) => {
     }
 
     return new NotFoundResponse("No data found").send(res);
-  } catch {
+  } catch (error) {
+    console.error(error);
     return new InternalErrorResponse("Failed to get products").send(res);
   }
 });

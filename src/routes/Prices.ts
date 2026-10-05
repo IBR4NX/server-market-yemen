@@ -4,15 +4,14 @@ const router = Router();
 
 router.get("/", async (req: Request, res: Response) => {
     try {
-        console.log("Query Parameters:", req.query);
+        console.log("Query Parametersssss:", req.query,);
         const { cityName, categoryName, search } = req.query;
-
         const result = await pool.query(
             `SELECT * FROM get_current_prices($1::text, $2::text, $3::text)`,
             [
-                cityName || null,
-                categoryName || null,
-                search || null
+                cityName??null,
+                categoryName?? null,
+                search?? null
             ] 
         );
 
