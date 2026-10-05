@@ -9,9 +9,13 @@ router.use("/prices", priceRouter);
 import categoriesRouter from "./meta/categories";
 import citiesRouter from "./meta/cities";
 import productsRouter from "./meta/products";
+import dashboardRouter from "./meta/dashboard";
+
 router.use("/cities", citiesRouter);
 router.use("/categories", categoriesRouter);
 router.use("/products", productsRouter);
+router.use("/dashboard", dashboardRouter);
+
 
 
 

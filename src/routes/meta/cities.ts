@@ -11,12 +11,10 @@ const router = Router();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    
     const { includeInactive } = req.query;
-    const result = await pool.query(
-      "select * from get_cities($1::boolean);",
-      [includeInactive === "true"],
-    );
+    const result = await pool.query("select * from get_cities($1::boolean);", [
+      includeInactive === "true",
+    ]);
 
     if (result.rows.length > 0) {
       return new SuccessResponse("successful", result.rows).send(res);

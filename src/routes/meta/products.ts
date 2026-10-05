@@ -12,11 +12,11 @@ const router = Router();
 router.get("/", async (req: Request, res: Response) => {
   try {
     const { categoryId, includeInactive, search } = req.query;
-            console.log(req.query,req.body);
+    console.log(req.query, req.body);
 
     const result = await pool.query(
       "select * from get_products($1::uuid, $2::uuid,$3::boolean, $3::text);",
-      [categoryId ?? null,null, includeInactive, search ?? null],
+      [categoryId ?? null, null, includeInactive, search ?? null],
     );
 
     if (result.rows.length > 0) {
@@ -52,7 +52,14 @@ router.patch("/:id", async (req: Request, res: Response) => {
     const { name, category_id, quantity, unit, is_active } = req.body;
     const result = await pool.query(
       "select * from update_product($1::uuid, $2::varchar, $3::uuid, $4::numeric, $5::varchar, $6::boolean);",
-      [req.params.id, name ?? null, category_id ?? null, quantity ?? null, unit ?? null, is_active ?? null],
+      [
+        req.params.id,
+        name ?? null,
+        category_id ?? null,
+        quantity ?? null,
+        unit ?? null,
+        is_active ?? null,
+      ],
     );
 
     if (result.rows.length > 0) {
