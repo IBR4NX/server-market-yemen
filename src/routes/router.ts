@@ -19,6 +19,8 @@ router.use("/dashboard", dashboardRouter);
 
 import sitemapRouter from "./SEO/sitemap";
 router.use("/sitemap.xml", sitemapRouter);
+import sitemap2Router from "./SEO/sitemap2";
+router.use("/sitemap2.xml", sitemap2Router);
 
 
 router.get('/check',auth,asyncHandler( async (req, res)=>{

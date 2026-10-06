@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import pool from "../../database";
+import {BASE_URL} from '../../config';
 
 const router = Router();
 type SitemapUrl = {
@@ -7,7 +8,6 @@ type SitemapUrl = {
   lastmod?: string | Date | null;
   priority: string;
 };
-const BASE_URL = "https://markets-ye.vercel.app";
 
 router.get("/", async (_req: Request, res: Response) => {
   try {
