@@ -17,6 +17,8 @@ router.use("/products", productsRouter);
 router.use("/dashboard", dashboardRouter);
 
 
+import sitemapRouter from "./SEO/sitemap";
+router.use("/sitemap.xml", sitemapRouter);
 
 
 router.get('/check',auth,asyncHandler( async (req, res)=>{
