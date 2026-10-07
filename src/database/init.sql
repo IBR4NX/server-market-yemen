@@ -470,7 +470,7 @@ $$;
 -- ---------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION create_product(
-    p_category_id UUID,
+    p_category_name VARCHAR(150),
     p_name VARCHAR(150),
     p_description TEXT,
     p_quantity DECIMAL(12,3),
@@ -488,14 +488,17 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 AS $$
+DECLARE
+    v_category_id UUID;
 BEGIN
+    SELECT c.id
+    INTO v_category_id
+    FROM categories c
+    WHERE TRIM(c.name) = TRIM(p_category_name)
+      AND c.is_active = TRUE
+    LIMIT 1;
 
-    IF NOT EXISTS (
-        SELECT 1
-        FROM categories
-        WHERE categories.id = p_category_id
-          AND categories.is_active = TRUE
-    ) THEN
+    IF v_category_id IS NULL THEN
         RAISE EXCEPTION 'Category not found or inactive';
     END IF;
 
@@ -508,7 +511,7 @@ BEGIN
         unit
     )
     VALUES (
-        p_category_id,
+        v_category_id,
         TRIM(p_name),
         p_description,
         p_quantity,
@@ -641,7 +644,7 @@ $$;
 
 CREATE OR REPLACE FUNCTION update_product(
     p_product_id UUID,
-    p_category_id UUID DEFAULT NULL,
+    p_category_name VARCHAR(150) DEFAULT NULL,
     p_name VARCHAR(150) DEFAULT NULL,
     p_description TEXT DEFAULT NULL,
     p_quantity DECIMAL(12,3) DEFAULT NULL,
@@ -660,39 +663,43 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 AS $$
+DECLARE
+    v_category_id UUID;
 BEGIN
+    IF p_category_name IS NOT NULL THEN
+        SELECT c.id
+        INTO v_category_id
+        FROM categories c
+        WHERE LOWER(TRIM(c.name)) = LOWER(TRIM(p_category_name))
+          AND c.is_active IS TRUE
+        LIMIT 1;
 
-    IF p_category_id IS NOT NULL
-       AND NOT EXISTS (
-           SELECT 1
-           FROM categories
-           WHERE categories.id = p_category_id
-             AND categories.is_active = TRUE
-       )
-    THEN
-        RAISE EXCEPTION 'Category not found or inactive';
+        IF v_category_id IS NULL THEN
+            RAISE EXCEPTION
+                'Category not found or inactive: "%"',
+                p_category_name;
+        END IF;
     END IF;
 
-
     RETURN QUERY
-    UPDATE products
+    UPDATE products as pr
     SET
-        category_id = COALESCE(p_category_id, category_id),
-        name = COALESCE(NULLIF(TRIM(p_name), ''), name),
-        description = COALESCE(p_description, description),
-        quantity = COALESCE(p_quantity, quantity),
-        unit = COALESCE(NULLIF(TRIM(p_unit), ''), unit),
-        is_active = COALESCE(p_is_active, is_active)
-    WHERE products.id = p_product_id
+        category_id = COALESCE(v_category_id, pr.category_id),
+        name = COALESCE(NULLIF(TRIM(p_name), ''), pr.name),
+        description = COALESCE(p_description, pr.description),
+        quantity = COALESCE(p_quantity, pr.quantity),
+        unit = COALESCE(NULLIF(TRIM(p_unit), ''), pr.unit),
+        is_active = COALESCE(p_is_active, pr.is_active)
+    WHERE pr.id = p_product_id
     RETURNING
-        products.id,
-        products.category_id,
-        products.name,
-        products.description,
-        products.quantity,
-        products.unit,
-        products.is_active,
-        products.updated_at;
+        pr.id,
+        pr.category_id,
+        pr.name,
+        pr.description,
+        pr.quantity,
+        pr.unit,
+        pr.is_active,
+        pr.updated_at;
 
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Product not found';
@@ -703,6 +710,8 @@ EXCEPTION
         RAISE EXCEPTION 'Product definition already exists';
 END;
 $$;
+
+
 
 
 -- =========================================================
@@ -1164,7 +1173,7 @@ $$;
 -- ---------------------------------------------------------
 
 
-	CREATE OR REPLACE FUNCTION get_current_prices(
+CREATE OR REPLACE FUNCTION get_current_prices(
     p_city_name     TEXT DEFAULT NULL,
     p_category_name TEXT DEFAULT NULL,
     p_search        TEXT DEFAULT NULL
@@ -1236,8 +1245,8 @@ $$;
 -- ---------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION get_price_history(
-    p_product_id UUID,
-    p_city_id UUID,
+    p_product_name VARCHAR(150),
+    p_city_name VARCHAR(100),
     p_from TIMESTAMPTZ DEFAULT NULL,
     p_to TIMESTAMPTZ DEFAULT NULL
 )
@@ -1265,24 +1274,23 @@ AS $$
         ph.approved_by,
         u.name AS approver_name,
         ph.created_at
-    FROM price_history ph
-    INNER JOIN products p
+    FROM price_history AS ph
+    INNER JOIN products AS p
         ON p.id = ph.product_id
-    INNER JOIN cities c
+    INNER JOIN cities AS c
         ON c.id = ph.city_id
-    INNER JOIN users u
+    INNER JOIN users AS u
         ON u.id = ph.approved_by
-    WHERE
-        ph.product_id = p_product_id
-        AND ph.city_id = p_city_id
-        AND (
-            p_from IS NULL
-            OR ph.created_at >= p_from
-        )
-        AND (
-            p_to IS NULL
-            OR ph.created_at <= p_to
-        )
+    WHERE LOWER(TRIM(p.name)) = LOWER(TRIM(p_product_name))
+      AND LOWER(TRIM(c.name)) = LOWER(TRIM(p_city_name))
+      AND (
+          p_from IS NULL
+          OR ph.created_at >= p_from
+      )
+      AND (
+          p_to IS NULL
+          OR ph.created_at <= p_to
+      )
     ORDER BY ph.created_at ASC;
 $$;
 

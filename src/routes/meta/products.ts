@@ -10,9 +10,8 @@ import {
 const router = Router();
 
 router.get("/", async (req: Request, res: Response) => {
-  console.log("ssss");
+  console.log("ssssggg");
   try {
-    console.log("ggg", req.query);
     const { categoryId, includeInactive, search } = req.query;
 
     const result = await pool.query(
@@ -33,10 +32,11 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const { name, category_id, quantity, unit } = req.body;
+    const { name, category_name,description, quantity, unit } = req.body;
+
     const result = await pool.query(
-      "select * from create_product($1::varchar, $2::uuid, $3::numeric, $4::varchar);",
-      [name, category_id, quantity, unit],
+      "select * from create_product($1::varchar,$2::varchar, $3::text, $4::numeric, $5::varchar);",
+      [category_name,name,description, quantity, unit],
     );
 
     if (result.rows.length > 0) {
@@ -44,32 +44,37 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     return new NotFoundResponse("No data found").send(res);
-  } catch {
+  } catch(err) {
+    console.error(err);
     return new InternalErrorResponse("Failed to create product").send(res);
   }
 });
 
 router.patch("/:id", async (req: Request, res: Response) => {
   try {
-    const { name, category_id, quantity, unit, is_active } = req.body;
+    const { name, category_name,description, quantity, unit, is_active } = req.body;
+            console.log("ggg", req.body);
+
     const result = await pool.query(
-      "select * from update_product($1::uuid, $2::varchar, $3::uuid, $4::numeric, $5::varchar, $6::boolean);",
+      "select * from update_product($1::uuid, $2::varchar, $3::varchar,$4::text, $5::numeric, $6::varchar, $7::boolean);",
       [
         req.params.id,
+        category_name ?? null,
         name ?? null,
-        category_id ?? null,
+        description??null,
         quantity ?? null,
         unit ?? null,
         is_active ?? null,
       ],
     );
-
+    console.log(result.rows)
     if (result.rows.length > 0) {
       return new SuccessResponse("successful", result.rows).send(res);
     }
 
     return new NotFoundResponse("No data found").send(res);
-  } catch {
+  } catch(err) {
+    console.error(err);
     return new InternalErrorResponse("Failed to update product").send(res);
   }
 });
