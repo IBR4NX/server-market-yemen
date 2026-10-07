@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import pool from "../../database";
-import {BASE_URL} from '../../config';
+import { BASE_URL } from "../../config";
 
 const router = Router();
 type SitemapUrl = {
@@ -10,8 +10,9 @@ type SitemapUrl = {
 };
 
 router.get(":sender", async (_req: Request, res: Response) => {
-  const MAP_URL = `https://${_req.params.sender?? _req.get("x-forwarded-host") ?? _req.get("host")}`;
   try {
+    
+    const MAP_URL = `https://${(_req.params.sender as string) ?? BASE_URL}`;
     console.log(MAP_URL);
     const [cities, products, categories] = await Promise.all([
       pool.query(`
@@ -33,7 +34,7 @@ router.get(":sender", async (_req: Request, res: Response) => {
       `),
     ]);
 
-    const urls :SitemapUrl[] = [
+    const urls: SitemapUrl[] = [
       {
         url: "/",
         priority: "1.0",
@@ -77,16 +78,13 @@ ${urls
     ${lastmod ? `<lastmod>${new Date(lastmod).toISOString()}</lastmod>` : ""}
     <changefreq>daily</changefreq>
     <priority>${priority}</priority>
-  </url>`
+  </url>`,
   )
   .join("")}
 
 </urlset>`;
 
-    res
-      .status(200)
-      .type("application/xml")
-      .send(xml);
+    res.status(200).type("application/xml").send(xml);
   } catch (error) {
     console.error("Sitemap error:", error);
 
