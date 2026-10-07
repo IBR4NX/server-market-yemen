@@ -46,19 +46,19 @@ router.get("/", async (_req: Request, res: Response) => {
       },
 
       ...cities.rows.map((city) => ({
-        url: `/prices/city/${city.name}`,
+        url: `/city/${city.name}`,
         lastmod: city.updated_at,
         priority: "0.8",
       })),
 
       ...products.rows.map((product) => ({
-        url: `/prices/product/${product.name}`,
+        url: `/product/${product.name}`,
         lastmod: product.updated_at,
         priority: "0.8",
       })),
 
       ...categories.rows.map((category) => ({
-        url: `/prices/category/${category.name}`,
+        url: `/category/${category.name}`,
         lastmod: category.updated_at,
         priority: "0.7",
       })),
