@@ -12,8 +12,8 @@ type SitemapUrl = {
 router.get("/sitemap.xml", async (_req: Request, res: Response) => {
   try {
 
-    const MAP_URL = `https://${(_req.params.sender as string) ?? BASE_URL}`;
-    console.log(MAP_URL);
+    const MAP_URL = `https://${(_req.query.sender as string) ?? BASE_URL}`;
+    console.log(_req.query.sender);
     const [cities, products, categories] = await Promise.all([
       pool.query(`
         SELECT id,name, updated_at
@@ -91,5 +91,56 @@ ${urls
     res.status(500).send("Failed to generate sitemap");
   }
 });
+
+router.get("/sitemap2.xml", async (_req: Request, res: Response) => {
+  try {
+    const MAP_URL = `https://${(_req.query.sender as string) ?? BASE_URL}`;
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM get_current_prices(
+        $1::text,
+        $2::text,
+        $3::text
+      )
+      `,
+      [null, null, null],
+    );
+
+    const urls = result.rows.map((price) => ({
+      url: `/city/${price.city_name.trim().replace(/\s+/g, "-")}/product/${price.product_name.trim().replace(/\s+/g, "-")}`,
+      lastmod: price.updated_at,
+      priority: "0.8",
+    }));
+
+    const uniqueUrls = Array.from(
+      new Map(urls.map((item) => [item.url, item])).values(),
+    );
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+>
+${uniqueUrls
+  .map(
+    ({ url, lastmod, priority }) => `
+  <url>
+    <loc>${MAP_URL}${url}</loc>
+    ${lastmod ? `<lastmod>${new Date(lastmod).toISOString()}</lastmod>` : ""}
+    <changefreq>daily</changefreq>
+    <priority>${priority}</priority>
+  </url>`,
+  )
+  .join("")}
+</urlset>`;
+
+    res.status(200).type("application/xml").send(xml);
+  } catch (error) {
+    console.error("Sitemap error:", error);
+
+    res.status(500).send("Failed to generate sitemap");
+  }
+});
+
 
 export default router;
