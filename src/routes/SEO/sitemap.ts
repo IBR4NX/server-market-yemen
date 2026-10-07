@@ -10,7 +10,7 @@ type SitemapUrl = {
 };
 
 router.get("/", async (_req: Request, res: Response) => {
-  const MAP_URL = _req.host??BASE_URL;
+  const MAP_URL = `https://${_req.get("x-forwarded-host") ?? _req.get("host")}`;
   try {
     console.log(_req);
     const [cities, products, categories] = await Promise.all([
