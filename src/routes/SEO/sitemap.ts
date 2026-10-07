@@ -10,7 +10,9 @@ type SitemapUrl = {
 };
 
 router.get("/", async (_req: Request, res: Response) => {
+  const MAP_URL = _req.host??BASE_URL;
   try {
+    console.log(_req);
     const [cities, products, categories] = await Promise.all([
       pool.query(`
         SELECT id,name, updated_at
@@ -71,7 +73,7 @@ ${urls
   .map(
     ({ url, lastmod, priority }) => `
   <url>
-    <loc>${BASE_URL}${url}</loc>
+    <loc>${MAP_URL}${url}</loc>
     ${lastmod ? `<lastmod>${new Date(lastmod).toISOString()}</lastmod>` : ""}
     <changefreq>daily</changefreq>
     <priority>${priority}</priority>
