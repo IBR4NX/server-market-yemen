@@ -9,8 +9,8 @@ type SitemapUrl = {
   priority: string;
 };
 
-router.get("/", async (_req: Request, res: Response) => {
-  const MAP_URL = `https://${_req.get("x-forwarded-host") ?? _req.get("host")}`;
+router.get("/?:sender", async (_req: Request, res: Response) => {
+  const MAP_URL = `https://${_req.sender?? _req.get("x-forwarded-host") ?? _req.get("host")}`;
   try {
     console.log(MAP_URL);
     const [cities, products, categories] = await Promise.all([
