@@ -9,7 +9,7 @@ type SitemapUrl = {
   priority: string;
 };
 
-router.get("/:sender", async (_req: Request, res: Response) => {
+router.get("/sitemap.xml", async (_req: Request, res: Response) => {
   try {
 
     const MAP_URL = `https://${(_req.params.sender as string) ?? BASE_URL}`;

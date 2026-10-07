@@ -18,7 +18,7 @@ router.use("/dashboard", dashboardRouter);
 
 
 import sitemapRouter from "./SEO/sitemap";
-router.use("/sitemap.xml", sitemapRouter);
+router.use("/sitmap", sitemapRouter);
 import sitemap2Router from "./SEO/sitemap2";
 router.use("/sitemap2.xml", sitemap2Router);
 
