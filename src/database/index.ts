@@ -1,10 +1,12 @@
 import {DB_URL, postgresConfig} from'../config';
 import { Pool } from "pg"; 
  
-// export const pool = new Pool({
-//     connectionString: DB_URL,
-// });
-export const pool = new Pool(postgresConfig);
+ export const pool = new Pool({
+     connectionString: DB_URL,
+ });
+
+//  if(pool == null)
+  //  export const pool = new Pool(postgresConfig);
 
 pool.query("SELECT NOW()")
     .then(() => console.log("Database connected"))
