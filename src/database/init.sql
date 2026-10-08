@@ -904,17 +904,18 @@ $$;
 -- =========================================================
 -- 6. APPROVE PRICE
 -- =========================================================
+--drop FUNCTION approve_price_submission
 CREATE OR REPLACE FUNCTION approve_price_submission(
     p_submission_id UUID,
     p_employee_id UUID
 )
-RETURNS TABLE (
-    submission_id UUID,
-    product_id UUID,
-    city_id UUID,
-    new_price DECIMAL(14,2),
-    previous_price DECIMAL(14,2),
-    approved_at TIMESTAMPTZ
+  RETURNS TABLE (
+    out_submission_id UUID,
+    out_product_id UUID,
+    out_city_id UUID,
+    out_new_price DECIMAL(14,2),
+    out_previous_price DECIMAL(14,2),
+    out_approved_at TIMESTAMPTZ
 )
 LANGUAGE plpgsql
 AS $$
@@ -941,20 +942,20 @@ BEGIN
     END IF;
 
 
-    -- Lock submission
-    SELECT
-        product_id,
-        city_id,
-        price,
-        status
-    INTO
-        v_product_id,
-        v_city_id,
-        v_price,
-        v_status
-    FROM price_submissions
-    WHERE id = p_submission_id
-    FOR UPDATE;
+-- Lock submission
+SELECT
+    ps.product_id,
+    ps.city_id,
+    ps.price,
+    ps.status
+INTO
+    v_product_id,
+    v_city_id,
+    v_price,
+    v_status
+FROM price_submissions AS ps
+WHERE ps.id = p_submission_id
+FOR UPDATE;
 
 
     IF NOT FOUND THEN
@@ -967,12 +968,12 @@ BEGIN
     END IF;
 
 
-    -- Get current price
-    SELECT price
-    INTO v_previous_price
-    FROM current_prices
-    WHERE product_id = v_product_id
-      AND city_id = v_city_id;
+-- Get current price
+SELECT cp.price
+INTO v_previous_price
+FROM current_prices AS cp
+WHERE cp.product_id = v_product_id
+  AND cp.city_id = v_city_id;
 
 
     -- Approve submission
@@ -1040,7 +1041,6 @@ BEGIN
 
 END;
 $$;
-
 
 -- =========================================================
 -- 7. REJECT PRICE
