@@ -11,7 +11,6 @@ type SitemapUrl = {
 
 router.get("/sitemap.xml", async (_req: Request, res: Response) => {
   try {
-
     const MAP_URL = `https://${(_req.query.sender as string) ?? BASE_URL}`;
     console.log(_req.query.sender);
     const [cities, products, categories] = await Promise.all([
@@ -158,26 +157,20 @@ router.get("/rss.xml", async (_req: Request, res: Response) => {
       [null, null, null],
     );
     const sortedRows = result.rows.sort(
-  (a, b) =>
-    new Date(b.updated_at).getTime() -
-    new Date(a.updated_at).getTime(),
-);
-
+      (a, b) =>
+        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+    );
     const items = sortedRows.map((price) => {
-      const citySlug = price.city_name
-        .trim()
-        .replace(/\s+/g, "-");
+      const citySlug = price.city_name.trim().replace(/\s+/g, "-");
 
-      const productSlug = price.product_name
-        .trim()
-        .replace(/\s+/g, "-");
+      const productSlug = price.product_name.trim().replace(/\s+/g, "-");
 
       const url = `/city/${citySlug}/product/${productSlug}`;
 
       return {
-        title: `${price.product_name} في ${price.city_name}`,
+        title: `سعر ${price.product_name} في ${price.city_name}`,
         url: `${MAP_URL}${url}`,
-        description: `تعرف على سعر ${price.product_name} في ${price.city_name} اليوم، مع أحدث تحديث متوفر للسعر.`,
+        description: `سعر ${price.product_name}  في محافظة ${price.city_name} اليوم هو ${price.price} ريال يمني لكل ${price.quantity} ${price.unit}. المنتج ضمن فئة ${price.category_name}،  مع أحدث تحديث متوفر للسعر, وأسباب التغيير`,
         lastmod: price.updated_at,
       };
     });
@@ -203,11 +196,7 @@ router.get("/rss.xml", async (_req: Request, res: Response) => {
       <link>${escapeXml(url)}</link>
       <guid isPermaLink="true">${escapeXml(url)}</guid>
       <description>${escapeXml(description)}</description>
-      ${
-        lastmod
-          ? `<pubDate>${new Date(lastmod).toUTCString()}</pubDate>`
-          : ""
-      }
+      ${lastmod ? `<pubDate>${new Date(lastmod).toUTCString()}</pubDate>` : ""}
     </item>`,
       )
       .join("")}
