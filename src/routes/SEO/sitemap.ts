@@ -142,5 +142,93 @@ ${uniqueUrls
   }
 });
 
+router.get("/rss.xml", async (_req: Request, res: Response) => {
+  try {
+    const MAP_URL = `https://${(_req.query.sender as string) ?? BASE_URL}`;
+
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM get_current_prices(
+        $1::text,
+        $2::text,
+        $3::text
+      )
+      `,
+      [null, null, null],
+    );
+    const sortedRows = result.rows.sort(
+  (a, b) =>
+    new Date(b.updated_at).getTime() -
+    new Date(a.updated_at).getTime(),
+);
+
+    const items = sortedRows.map((price) => {
+      const citySlug = price.city_name
+        .trim()
+        .replace(/\s+/g, "-");
+
+      const productSlug = price.product_name
+        .trim()
+        .replace(/\s+/g, "-");
+
+      const url = `/city/${citySlug}/product/${productSlug}`;
+
+      return {
+        title: `${price.product_name} في ${price.city_name}`,
+        url: `${MAP_URL}${url}`,
+        description: `تعرف على سعر ${price.product_name} في ${price.city_name} اليوم، مع أحدث تحديث متوفر للسعر.`,
+        lastmod: price.updated_at,
+      };
+    });
+
+    const uniqueItems = Array.from(
+      new Map(items.map((item) => [item.url, item])).values(),
+    );
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+  <title>أسعار اليمن اليوم للمنتجات والسلع</title>
+<description>تابع أحدث أسعار المنتجات والسلع في اليمن حسب المدينة، وتعرّف على أسعار المنتجات في صنعاء وتعز وعدن وغيرها من المدن اليمنية.</description>
+    <link>${MAP_URL}/</link>
+    <language>ar</language>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+
+    ${uniqueItems
+      .map(
+        ({ title, url, description, lastmod }) => `
+    <item>
+      <title>${escapeXml(title)}</title>
+      <link>${escapeXml(url)}</link>
+      <guid isPermaLink="true">${escapeXml(url)}</guid>
+      <description>${escapeXml(description)}</description>
+      ${
+        lastmod
+          ? `<pubDate>${new Date(lastmod).toUTCString()}</pubDate>`
+          : ""
+      }
+    </item>`,
+      )
+      .join("")}
+
+  </channel>
+</rss>`;
+
+    res.status(200).type("application/rss+xml").send(xml);
+  } catch (error) {
+    console.error("RSS error:", error);
+    res.status(500).send("Failed to generate RSS");
+  }
+});
+
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
 
 export default router;
