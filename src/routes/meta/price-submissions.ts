@@ -7,6 +7,8 @@ import {
 } from "../../core/ApiResponse";
 
 const router = Router();
+const user_email = "admin@example.com";
+const employee_id = "1b411cfa-0142-4b30-8216-93e7e240f6f8";
 
 router.get("/", async (_req: Request, res: Response) => {
   try {
@@ -48,11 +50,10 @@ router.get("/user/:userId", async (req: Request, res: Response) => {
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const { product_id, city_id, user_id, price, note } = req.body;
-
+    const { product_name, city_name, price, note } = req.body;
     const result = await pool.query(
-      "select * from create_price_submission($1::uuid, $2::uuid, $3::uuid, $4::decimal, $5::text);",
-      [product_id, city_id, user_id, price, note ?? null],
+      "select * from create_price_submission($1::text, $2::text, $3::text, $4::decimal, $5::text);",
+      [product_name, city_name, user_email, price, note ?? null],
     );
 
     if (result.rows.length > 0) {
@@ -68,7 +69,6 @@ router.post("/", async (req: Request, res: Response) => {
 
 router.patch("/:id/approve", async (req: Request, res: Response) => {
   try {
-    const { employee_id } = req.body;
 
     const result = await pool.query(
       "select * from approve_price_submission($1::uuid, $2::uuid);",
@@ -79,7 +79,8 @@ router.patch("/:id/approve", async (req: Request, res: Response) => {
       return new SuccessResponse("successful", result.rows).send(res);
     }
     return new NotFoundResponse("No data found").send(res);
-  } catch {
+    } catch (error) {
+        console.error(error);    
     return new InternalErrorResponse(
       "Failed to approve price submission",
     ).send(res);
@@ -88,7 +89,7 @@ router.patch("/:id/approve", async (req: Request, res: Response) => {
 
 router.patch("/:id/reject", async (req: Request, res: Response) => {
   try {
-    const { employee_id, reason } = req.body;
+    const {  reason } = req.body;
 
     const result = await pool.query(
       "select * from reject_price_submission($1::uuid, $2::uuid, $3::text);",

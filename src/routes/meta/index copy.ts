@@ -10,8 +10,8 @@ router.get("/", async (req: Request, res: Response) => {
         const result = await pool.query("");
 
     } catch (error) {
+        console.error(error);
         message = "Failed to get information";
-         console.error(error);
         return new InternalErrorResponse(message).send(res);
     }
 });

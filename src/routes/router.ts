@@ -10,17 +10,18 @@ import categoriesRouter from "./meta/categories";
 import citiesRouter from "./meta/cities";
 import productsRouter from "./meta/products";
 import dashboardRouter from "./meta/dashboard";
+import submissionRouter from "./meta/price-submissions";
 
 router.use("/cities", citiesRouter);
 router.use("/categories", categoriesRouter);
 router.use("/products", productsRouter);
 router.use("/dashboard", dashboardRouter);
+router.use("/submission", submissionRouter);
 
 
 import sitemapRouter from "./SEO/sitemap";
 router.use("/sitemap", sitemapRouter);
-// import sitemap2Router from "./SEO/sitemap2";
-// router.use("/sitemap2.xml", sitemap2Router);
+ 
 
 
 router.get('/check',auth,asyncHandler( async (req, res)=>{
