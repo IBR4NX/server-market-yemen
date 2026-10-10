@@ -222,6 +222,43 @@ router.get("/rss.xml", async (_req: Request, res: Response) => {
   }
 });
 
+router.get("/notify", async (_req: Request, res: Response) => {
+  try {
+    const HUB_URL = "https://pubsubhubbub.appspot.com/";
+    const FEED_URL = `https://${BASE_URL}/api/sitemap/rss.xml`;
+
+    const body = new URLSearchParams({
+      "hub.mode": "publish",
+      "hub.url": FEED_URL,
+    });
+
+    const response = await fetch(HUB_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: body.toString(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`WebSub notification failed: ${response.status}`);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "WebSub notification sent successfully.",
+    } satisfies SuccessResponse);
+  } catch (error) {
+    console.error("WebSub notification error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send WebSub notification.",
+    });
+  }
+});
+
+
 function escapeXml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
