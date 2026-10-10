@@ -144,7 +144,9 @@ ${uniqueUrls
 router.get("/rss.xml", async (_req: Request, res: Response) => {
   try {
     const MAP_URL = `https://${(_req.query.sender as string) ?? BASE_URL}`;
-
+    const HUB_URL = "https://pubsubhubbub.appspot.com/";
+    const FEED_URL = `${BASE_URL}/api/sitemap/rss.xml`;
+    
     const result = await pool.query(
       `
       SELECT *
@@ -180,9 +182,18 @@ router.get("/rss.xml", async (_req: Request, res: Response) => {
     );
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" >
   <channel>
   <title>أسعار اليمن اليوم للمنتجات والسلع</title>
+  <atom:link
+  href="${escapeXml(HUB_URL)}"
+  rel="hub"
+/>
+<atom:link
+  href="${escapeXml(FEED_URL)}"
+  rel="self"
+  type="application/rss+xml"
+/>
 <description>تابع أحدث أسعار المنتجات والسلع في اليمن حسب المدينة، وتعرّف على أسعار المنتجات في صنعاء وتعز وعدن وغيرها من المدن اليمنية.</description>
     <link>${MAP_URL}/</link>
     <language>ar</language>
