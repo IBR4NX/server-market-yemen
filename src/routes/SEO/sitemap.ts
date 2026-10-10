@@ -247,7 +247,7 @@ router.get("/notify", async (_req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       message: "WebSub notification sent successfully.",
-    } satisfies SuccessResponse);
+    });
   } catch (error) {
     console.error("WebSub notification error:", error);
 
